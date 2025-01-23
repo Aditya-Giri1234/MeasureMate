@@ -6,6 +6,8 @@ import java.nio.charset.StandardCharsets
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import kotlin.math.pow
+import kotlin.math.roundToInt
 
 //region:: other
 
@@ -20,6 +22,17 @@ fun String.urlEncode(): String {
 
 fun String.urlDecode(): String {
     return URLDecoder.decode(this, StandardCharsets.UTF_8.toString())
+}
+
+fun Float.roundToDecimal(decimalPlaces: Int = 1): Float {
+    val multiplier = 10.0.pow(decimalPlaces)
+    return (this * multiplier).roundToInt() / multiplier.toFloat()
+}
+
+fun String.roundToDecimal(decimalPlaces: Int = 1): Float {
+    val multiplier = 10.0.pow(decimalPlaces)
+    val value = this.toFloatOrNull() ?: 0f
+    return (value * multiplier).roundToInt() / multiplier.toFloat()
 }
 
 //endregion
