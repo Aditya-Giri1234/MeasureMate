@@ -4,6 +4,8 @@ import java.net.URLDecoder
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 import java.text.SimpleDateFormat
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import java.util.Date
 import java.util.Locale
 import kotlin.math.pow
@@ -33,6 +35,17 @@ fun String.roundToDecimal(decimalPlaces: Int = 1): Float {
     val multiplier = 10.0.pow(decimalPlaces)
     val value = this.toFloatOrNull() ?: 0f
     return (value * multiplier).roundToInt() / multiplier.toFloat()
+}
+
+fun LocalDate?.changeLocalDateToGraphDate(
+    defaultValue : LocalDate = LocalDate.now()
+) : String{
+    return try{
+              this?.format(DateTimeFormatter.ofPattern("MMM dd")) ?: defaultValue.format(DateTimeFormatter.ofPattern("MMM dd"))
+    }catch (e :Exception){
+        e.printStackTrace()
+         defaultValue.format(DateTimeFormatter.ofPattern("MMM dd"))
+    }
 }
 
 //endregion
