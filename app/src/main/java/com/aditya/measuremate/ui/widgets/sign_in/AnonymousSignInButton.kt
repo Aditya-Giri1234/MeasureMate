@@ -26,6 +26,7 @@ import com.example.udemycourseshoppingapp.ui.components.AddHorizontalSpace
 fun AnonymousSignInButton(
     modifier: Modifier = Modifier,
     isLoading: Boolean = false,
+    isEnable : Boolean = true,
     primaryText: String = "Continue Without Login",
     secondaryText: String = "Please wait...",
     onClick: () -> Unit = {}
@@ -39,7 +40,7 @@ fun AnonymousSignInButton(
     }
     Button(
         onClick = onClick ,
-        enabled = !isLoading ,
+        enabled = isEnable ,
         colors = ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.onBackground ,
             disabledContentColor = MaterialTheme.colorScheme.onSecondary

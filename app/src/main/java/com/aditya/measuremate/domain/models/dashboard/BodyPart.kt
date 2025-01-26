@@ -5,6 +5,7 @@ import com.example.udemycourseshoppingapp.common.utils.helper.MeasuringUnit
 data class BodyPart(
     val bodyPartId : String ?=null ,
     val name : String ,
+    @field:JvmField
     val isActive : Boolean,
     val measuringUnit :String,
     val latestValue : Float?=null
@@ -14,7 +15,8 @@ val predefinedBodyParts: List<BodyPart> = listOf(
     BodyPart(
         name = "Waist",
         isActive = true,
-        measuringUnit = MeasuringUnit.CM.code
+        measuringUnit = MeasuringUnit.CM.code ,
+        bodyPartId = "541"
     ),
     BodyPart(
         name = "Body Fat",

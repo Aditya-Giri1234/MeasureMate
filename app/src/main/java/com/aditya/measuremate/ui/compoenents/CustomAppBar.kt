@@ -3,6 +3,7 @@ package com.example.udemycourseshoppingapp.ui.components
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -47,6 +48,7 @@ fun MyTopBar(
                 ) , maxLines = 1 , overflow = TextOverflow.Ellipsis
             )
         },
+        windowInsets = WindowInsets(left = 0, top = 0 , right = 0 , bottom = 0),
         navigationIcon = {
             NavigationIcon(screenName, title, navController)
         },

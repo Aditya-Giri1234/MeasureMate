@@ -28,6 +28,7 @@ import com.example.udemycourseshoppingapp.ui.components.AddHorizontalSpace
 fun GoogleSignInButton(
     modifier: Modifier = Modifier,
     isLoading: Boolean = false,
+    isEnable : Boolean = true,
     primaryText: String = "Sign in to google",
     secondaryText: String = "Please wait...",
     onClick: () -> Unit = {}
@@ -41,7 +42,7 @@ fun GoogleSignInButton(
     }
     Button(
         onClick = onClick ,
-        enabled = !isLoading ,
+        enabled = isEnable ,
         colors = ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.onBackground ,
             disabledContentColor = MaterialTheme.colorScheme.onSecondary

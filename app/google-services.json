@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "53022528071",
+    "project_id": "measuremate-fc17a",
+    "storage_bucket": "measuremate-fc17a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:53022528071:android:51003a377f4d51c7141762",
+        "android_client_info": {
+          "package_name": "com.aditya.measuremate"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "53022528071-l1u66lggdh8vf49poff3uo349j6s1guj.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.aditya.measuremate",
+            "certificate_hash": "5d381757246e91612101735fd3ecf494687503d4"
+          }
+        },
+        {
+          "client_id": "53022528071-glb0at8budlspbk3p57958lsqjquad8h.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD-QgOOOBYpvyIj3tLDqb0lWr4rPOkrId0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "53022528071-glb0at8budlspbk3p57958lsqjquad8h.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

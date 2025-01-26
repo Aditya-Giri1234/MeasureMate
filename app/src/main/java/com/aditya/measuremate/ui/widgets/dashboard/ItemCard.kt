@@ -29,17 +29,20 @@ import com.example.udemycourseshoppingapp.ui.components.AddHorizontalSpace
 @Preview
 @Composable
 fun ItemCard(
-    modifier: Modifier = Modifier, bodyPart: BodyPart = BodyPart(
+    modifier: Modifier = Modifier , bodyPart: BodyPart = BodyPart(
         name = "Waist",
         isActive = true,
         measuringUnit = MeasuringUnit.CM.code
-    )
+    ) , onItemClick : (BodyPart) -> Unit = {}
 ) {
     Card(
         shape = RoundedCornerShape(20.dp),
         elevation = CardDefaults.cardElevation(
             defaultElevation = 4.dp
-        )
+        ) ,
+        onClick = {
+            onItemClick(bodyPart)
+        }
     ) {
         Row(
             Modifier

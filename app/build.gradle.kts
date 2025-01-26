@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.kotlin.serialization.plugin)
     id("kotlin-parcelize")
+    alias(libs.plugins.google.gms.google.services)
 }
 
 android {
@@ -125,4 +126,15 @@ dependencies {
 
     //For Adaptive Layout
     implementation(libs.androidx.material3.windowSizeClass)
+
+    //splash screen
+    implementation(libs.androidx.core.splashscreen)
+
+    //credential manager
+    implementation(libs.androidx.credentials)
+
+    // optional - needed for credentials support from play services, for devices running
+    // Android 13 and below.
+    implementation(libs.androidx.credentials.play.services.auth)
+    implementation(libs.googleid)
 }

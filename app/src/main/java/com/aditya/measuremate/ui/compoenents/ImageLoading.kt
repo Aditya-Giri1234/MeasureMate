@@ -8,7 +8,6 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -19,7 +18,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -30,13 +28,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
 import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
 import coil.imageLoader
 import coil.request.ImageRequest
 import coil.size.Size
-import coil.util.DebugLogger
 import com.aditya.measuremate.R
 import com.example.udemycourseshoppingapp.common.utils.helper.MyLogger
 
@@ -54,7 +50,8 @@ fun ImageLoading(
         .build()
 
 
-    val imageState = rememberAsyncImagePainter(model = model , imageLoader = context.imageLoader).state
+    val imageState =
+        rememberAsyncImagePainter(model = model, imageLoader = context.imageLoader).state
 
 
     Box(modifier.background(color = Color.White), contentAlignment = Alignment.Center) {
@@ -95,18 +92,22 @@ fun ImageLoading(
 }
 
 @Composable
-fun CircleImageLoading( imageUrl: String,
-                        modifier: Modifier = Modifier.size(80.dp),
-                        contentScale: ContentScale = ContentScale.FillWidth) {
+fun CircleImageLoading(
+    imageUrl: String?,
+    modifier: Modifier = Modifier.size(80.dp),
+    contentScale: ContentScale = ContentScale.FillWidth
+) {
     val context = LocalContext.current
-    val model = ImageRequest.Builder(context)
-        .data(imageUrl)
-        .crossfade(true)
-        .size(Size.ORIGINAL)
-        .build()
 
 
-    val imageState = rememberAsyncImagePainter(model = model , imageLoader = context.imageLoader).state
+    val imageState = rememberAsyncImagePainter(
+        model = ImageRequest.Builder(context)
+            .data(imageUrl)
+            .crossfade(true)
+            .size(Size.ORIGINAL)
+            .error(R.drawable.app_logo)
+            .build(), imageLoader = context.imageLoader
+    ).state
 
 
     Box(modifier.background(color = Color.Transparent), contentAlignment = Alignment.Center) {
@@ -132,7 +133,7 @@ fun CircleImageLoading( imageUrl: String,
                     contentDescription = "Load Image",
                     contentScale = contentScale,
                     modifier = Modifier
-                        .clip(CircleShape) ,
+                        .clip(CircleShape),
 
                     )
             }
@@ -144,9 +145,9 @@ fun CircleImageLoading( imageUrl: String,
                     contentDescription = "Load Image",
                     contentScale = contentScale,
                     modifier = Modifier
-                        .clip(CircleShape) ,
+                        .clip(CircleShape),
 
-                )
+                    )
             }
 
             else -> {
@@ -156,7 +157,7 @@ fun CircleImageLoading( imageUrl: String,
                     contentDescription = "Load Image",
                     contentScale = contentScale,
                     modifier = Modifier
-                        .clip(CircleShape) ,
+                        .clip(CircleShape),
 
                     )
             }
@@ -174,8 +175,8 @@ fun LoadingAnimation(
     dotSize: Dp = 8.dp,
     spaceBetween: Dp = 4.dp,
     bounceHeight: Dp = 16.dp,
-    animationDelay: Int = 300 ,
-    text : String = "Loading..."
+    animationDelay: Int = 300,
+    text: String = "Loading..."
 ) {
     val infiniteTransition = rememberInfiniteTransition()
     Row(
@@ -206,6 +207,11 @@ fun LoadingAnimation(
             )
         }
         AddHorizontalSpace(8)
-        Text(text = text, style = MaterialTheme.typography.bodyLarge , maxLines = 1 , overflow = TextOverflow.Ellipsis)
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodyLarge,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
     }
 }

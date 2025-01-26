@@ -3,6 +3,14 @@ package com.example.udemycourseshoppingapp.common.utils.helper
 object Constants {
 
     const val ADD_EVENT_DATE_FORMAT = "EEE MMM dd yyyy"
+    const val GOOGLE_CLIENT_ID = "53022528071-glb0at8budlspbk3p57958lsqjquad8h.apps.googleusercontent.com"
+
+
+    //Firestore Collection
+    const val USER_COLLECTION = "users"
+    const val BODY_PART_COLLECTION = "bodyParts"
+    const val BODY_PART_VALUE_COLLECTION = "bodyPartValues"
+    const val BODY_PART_NAME_FIELD = "name"
 
 }
 
@@ -33,4 +41,10 @@ enum class TimeRange(
     LAST7DAYS("Last 7 days"),
     LAST30DAYS("Last 30 days") ,
     ALL_TIME ("All Time")
+}
+
+enum class AuthState{
+    Loading,
+    Authorized,
+    UnAuthorized
 }
