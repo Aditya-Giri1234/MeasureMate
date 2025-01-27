@@ -4,10 +4,10 @@ import com.example.udemycourseshoppingapp.common.utils.helper.MeasuringUnit
 
 data class BodyPart(
     val bodyPartId : String ?=null ,
-    val name : String ,
+    val name : String = "" ,
     @field:JvmField
-    val isActive : Boolean,
-    val measuringUnit :String,
+    val isActive : Boolean = false,
+    val measuringUnit :String = MeasuringUnit.CM.code,
     val latestValue : Float?=null
 )
 

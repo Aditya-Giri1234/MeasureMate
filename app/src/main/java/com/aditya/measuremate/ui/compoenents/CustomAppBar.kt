@@ -26,6 +26,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.aditya.measuremate.ui.event.add_item.AddItemEvent
 import com.aditya.measuremate.ui.theme.CustomBlue
 import com.aditya.measuremate.ui.theme.CustomPink
 import com.example.udemycourseshoppingapp.common.utils.helper.AppScreenName
@@ -44,7 +45,7 @@ fun MyTopBar(
             Text(
                 title, style = MaterialTheme.typography.titleLarge.copy(
                     fontWeight = FontWeight.SemiBold,
-                    color = Color.Black
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 ) , maxLines = 1 , overflow = TextOverflow.Ellipsis
             )
         },
@@ -54,7 +55,7 @@ fun MyTopBar(
         },
         actions = action,
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = Color.LightGray
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
         )
     )
 
@@ -68,17 +69,17 @@ private fun NavigationIcon(
     navController: NavController
 ) {
     when (screenName) {
-        AppScreenName.HomeScreen -> {
+        AppScreenName.SignInScreen , AppScreenName.DashboardScreen -> {
 
         }
 
         else -> {
-            IconWithoutDesc(
-                Icons.AutoMirrored.Filled.ArrowBack,
-                tint = Color.Black,
-                modifier = Modifier.clickable {
-                    navController.navigateUp()
-                })
+            IconButton(onClick = {
+                navController.navigateUp()
+            }) {
+                IconWithoutDesc(
+                    Icons.AutoMirrored.Filled.ArrowBack)
+            }
         }
     }
 

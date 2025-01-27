@@ -11,5 +11,6 @@ data class DetailsState(
     val date : LocalDate = LocalDate.now() ,
     val timeRange : TimeRange = TimeRange.LAST7DAYS ,
     val allBodyPartValue: List<BodyPartValue> = emptyList() ,
-    val chartBodyPartValue : List<BodyPartValue>  = emptyList()
+    val chartBodyPartValue : List<BodyPartValue>  = emptyList() ,
+    val recentlyDeletedBodyPartValue : BodyPartValue?=null,
 )

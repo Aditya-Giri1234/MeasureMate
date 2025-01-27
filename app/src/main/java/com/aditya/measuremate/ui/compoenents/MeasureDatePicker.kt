@@ -5,6 +5,7 @@ import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DatePickerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 
@@ -19,10 +20,14 @@ fun MeasureMateDatePicker(modifier: Modifier = Modifier , datePickerState : Date
                 onDismissRequest()
             } ,
             confirmButton = {
-                Text(confirmButtonTExt)
+                TextButton(onClick = onConfirmButton) {
+                    Text(confirmButtonTExt)
+                }
             } ,
             dismissButton = {
-                Text(dismissButtonText)
+                TextButton(onClick = onDismissRequest) {
+                    Text(dismissButtonText)
+                }
             } ,
             content = {
                 DatePicker(state = datePickerState )

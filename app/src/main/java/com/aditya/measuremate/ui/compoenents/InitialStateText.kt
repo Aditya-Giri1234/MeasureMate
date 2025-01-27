@@ -12,9 +12,7 @@ import androidx.compose.ui.text.style.TextAlign
 fun InitialStateText(msg: String, modifier: Modifier = Modifier) {
     Text(
         msg, style = MaterialTheme.typography.titleLarge.copy(
-            color = Color.Black.copy(
-                alpha = .8f
-            ),
+            color = MaterialTheme.colorScheme.onSurface,
             fontWeight = FontWeight.Medium
         ),
         modifier = modifier ,

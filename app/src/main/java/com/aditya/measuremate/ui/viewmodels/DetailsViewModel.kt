@@ -13,6 +13,7 @@ import com.aditya.measuremate.ui.event_state.details.DetailsState
 import com.aditya.measuremate.ui.navigation.AppNavigationScreens
 import com.example.common.extension.changeToDate
 import com.example.common.extension.roundToDecimal
+import com.example.udemycourseshoppingapp.common.utils.helper.TimeRange
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,6 +24,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 import javax.inject.Inject
 
 
@@ -36,10 +38,31 @@ class DetailsViewModel @Inject constructor(
     private val _uiScreenState = MutableStateFlow(DetailsState())
     val uiScreenState = combine(
         _uiScreenState,
-        databaseRepo.getBodyPart(bodyPartId)
-    ) { state, bodyPart ->
+        databaseRepo.getBodyPart(bodyPartId) ,
+        databaseRepo.getAllBodyPartValues(bodyPartId)
+    ) { state, bodyPart , bodyPartValues ->
+        val currentDate = LocalDate.now()
+        val last7DaysValue = bodyPartValues.filter { bodyPartValue ->
+            bodyPartValue.date.isAfter(currentDate.minusDays(7))
+        }
+        val last30DaysValue = bodyPartValues.filter { bodyPartValue ->
+            bodyPartValue.date.isAfter(currentDate.minusDays(30))
+
+        }
         state.copy(
-            bodyPart = bodyPart
+            bodyPart = bodyPart ,
+            allBodyPartValue = bodyPartValues ,
+            chartBodyPartValue = when(state.timeRange){
+                TimeRange.LAST7DAYS -> {
+                    last7DaysValue
+                }
+                TimeRange.LAST30DAYS ->{
+                    last30DaysValue
+                }
+                TimeRange.ALL_TIME -> {
+                    bodyPartValues
+                }
+            }
         )
     }.catch { e ->
         _uiEvent.send(UiEvent.SnackBar("Something went wrong. ${e.message}"))
@@ -79,6 +102,13 @@ class DetailsViewModel @Inject constructor(
             }
 
             is DetailsEvent.DeleteBodyPartValue -> {
+                deleteBodyPartValue(event.bodyPartValue)
+                _uiScreenState.update {
+                    it.copy(
+                        recentlyDeletedBodyPartValue = event.bodyPartValue
+                    )
+                }
+
             }
 
             is DetailsEvent.OnDateChange -> {
@@ -98,11 +128,21 @@ class DetailsViewModel @Inject constructor(
             }
 
             is DetailsEvent.OnTimeRangeChange -> {
+                _uiScreenState.update {
+                    it.copy(
+                        timeRange = event.timeRange
+                    )
+                }
 
             }
 
             DetailsEvent.RestoreBodyPartValue -> {
-
+                upsertBodyPartValue(uiScreenState.value.recentlyDeletedBodyPartValue)
+                _uiScreenState.update {
+                    it.copy(
+                        recentlyDeletedBodyPartValue = null
+                    )
+                }
             }
         }
     }
@@ -121,8 +161,8 @@ class DetailsViewModel @Inject constructor(
     private fun deleteBodyPart() {
         viewModelScope.launch {
             databaseRepo.deleteBodyPart(bodyPartId).onSuccess {
-                _uiEvent.send(UiEvent.SnackBar("Body Part deleted successfully !"))
                 _uiEvent.send(UiEvent.Navigate)
+                _uiEvent.send(UiEvent.SnackBar("Body Part deleted successfully !"))
             }.onFailure { e ->
                 _uiEvent.send(UiEvent.SnackBar("Couldn't delete. ${e.message}"))
             }
@@ -139,4 +179,17 @@ class DetailsViewModel @Inject constructor(
             }
         }
     }
+
+    private fun deleteBodyPartValue(bodyPartValue: BodyPartValue?) {
+        viewModelScope.launch {
+            bodyPartValue ?: return@launch
+            databaseRepo.deleteBodyPartValue(bodyPartValue).onSuccess {
+                _uiEvent.send(UiEvent.SnackBar("Body Part Value delete successfully !" , actionLabel = "Undo"))
+            }.onFailure { e ->
+                _uiEvent.send(UiEvent.SnackBar("Couldn't deleted. ${e.message}"))
+            }
+        }
+    }
+
+
 }

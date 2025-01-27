@@ -19,7 +19,9 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -36,12 +38,14 @@ class DashboardViewModel @Inject constructor(
     val dashBoardScreenState = combine(
         _dashBoardScreenState,
         databaseRepo.getSignedUser(),
-        databaseRepo.getAllBodyParts()
+        databaseRepo.getAllBodyPartsWithLatestValue()
     ) { state, user, bodyParts ->
-        val activeBodyPart = bodyParts.filter { it.isActive }
+        val isDataLoading = bodyParts.first
+        val activeBodyPart = bodyParts.second?.filter { it.isActive } ?: emptyList()
         state.copy(
             user = user,
-            bodyPart = activeBodyPart
+            bodyPart = activeBodyPart,
+            dataIsLoading = isDataLoading
         )
     }.catch { e ->
         _uiEvent.send(UiEvent.SnackBar("Something went wrong. ${e.message}"))
@@ -104,7 +108,7 @@ class DashboardViewModel @Inject constructor(
 
             _dashBoardScreenState.update {
                 it.copy(
-                    isSignOutButtonLoading =  true
+                    isSignOutButtonLoading = true
                 )
             }
             val response = authRepo.signOut().first()
@@ -118,7 +122,7 @@ class DashboardViewModel @Inject constructor(
 
             _dashBoardScreenState.update {
                 it.copy(
-                    isSignOutButtonLoading =  false
+                    isSignOutButtonLoading = false
                 )
             }
 

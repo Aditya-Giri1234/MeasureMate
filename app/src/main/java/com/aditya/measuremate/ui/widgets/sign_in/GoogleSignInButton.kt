@@ -51,14 +51,14 @@ fun GoogleSignInButton(
 
         if(!isLoading){
             Icon(
-                painter = painterResource(R.drawable.ic_google_logo) , contentDescription = "" , tint = Color.Unspecified
+                painter = painterResource(R.drawable.ic_google_logo) , contentDescription = ""  , tint = Color.Unspecified
             )
         }
         AddHorizontalSpace(5)
-        Text(buttonText)
+        Text(buttonText , color = if (isEnable) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant)
         AddHorizontalSpace(5)
         if(isLoading){
-            CircularProgressIndicator(strokeWidth = 1.dp, color = Color.White , modifier = Modifier.size(20.dp))
+            CircularProgressIndicator(strokeWidth = 1.dp, color = MaterialTheme.colorScheme.onSurfaceVariant , modifier = Modifier.size(20.dp))
         }
 
     }

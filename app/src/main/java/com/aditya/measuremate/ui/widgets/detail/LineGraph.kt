@@ -34,9 +34,11 @@ fun LineGraph(
     modifier: Modifier = Modifier,
     bodyPartValues: List<BodyPartValue>,
     pathAndCircleWidth: Float = 5f,
-    pathAndCircleColor: Color = Color.Gray,
+    pathAndCircleColor: Color = MaterialTheme.colorScheme.primary,
     helperLineColor: Color = MaterialTheme.colorScheme.surfaceVariant ,
-    textStyle : TextStyle = MaterialTheme.typography.bodySmall
+    textStyle : TextStyle = MaterialTheme.typography.bodySmall.copy(
+        color = MaterialTheme.colorScheme.onSurface
+    )
 ) {
 
     val dataPointValues = bodyPartValues.asReversed().map { it.value }

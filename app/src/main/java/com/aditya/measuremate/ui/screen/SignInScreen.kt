@@ -16,6 +16,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -47,38 +48,20 @@ import com.example.udemycourseshoppingapp.ui.components.AddVerticalSpace
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
-@PreviewScreenSizes
 @Composable
 fun SignInScreen(
     navController: NavController = rememberNavController(),
     screenSize: WindowWidthSizeClass = WindowWidthSizeClass.Compact,
-    innerPadding: PaddingValues = PaddingValues(8.dp),
-    signInViewModel: SignInViewModel = hiltViewModel(),
-    snackBarState: SnackbarHostState = remember{SnackbarHostState()}
+    signInState: State<SignInState>,
+    onEvent: (SignInEvent) -> Unit
 ) {
 
     var isSignInAnonymousDialogOpen by rememberSaveable {
         mutableStateOf(false)
     }
     val context = LocalContext.current
-    val signInState = signInViewModel.signInState.collectAsStateWithLifecycle(SignInState())
-    val authState = signInViewModel.authState.collectAsStateWithLifecycle()
 
 
-    LaunchedEffect(authState.value) {
-        MyLogger.d(msg = "LaunchedEffect : - > ${authState.value.name}")
-        when(authState.value){
-            AuthState.Loading -> {}
-            AuthState.Authorized -> {
-                navController.navigate(AppNavigationScreens.DashboardScreen){
-                    popUpTo(AppNavigationScreens.DashboardScreen) {
-                        inclusive = false
-                    }
-                }
-            }
-            AuthState.UnAuthorized -> {}
-        }
-    }
 
 
     MeasureMetaDialog(
@@ -92,7 +75,7 @@ fun SignInScreen(
         },
         onConfirmButtonClick = {
             isSignInAnonymousDialogOpen = false
-            signInViewModel.onEvent(SignInEvent.SignInAnonymously)
+            onEvent(SignInEvent.SignInAnonymously)
         }
     )
 
@@ -100,7 +83,6 @@ fun SignInScreen(
         WindowWidthSizeClass.Compact -> {
             Column(
                 modifier = Modifier
-                    .padding(innerPadding)
                     .fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
@@ -123,7 +105,7 @@ fun SignInScreen(
 
                 GoogleSignInButton(
                     onClick = {
-                        signInViewModel.onEvent(SignInEvent.SignInWithGoogle(context))
+                        onEvent(SignInEvent.SignInWithGoogle(context))
                     },
                     isLoading = signInState.value.isGoogleSignInButtonLoading,
                     isEnable = !signInState.value.isGoogleSignInButtonLoading && !signInState.value.isAnonymousSignInButtonLoading
@@ -142,12 +124,11 @@ fun SignInScreen(
         else -> {
             Row(
                 modifier = Modifier
-                    .padding(innerPadding)
                     .fillMaxSize()
             ) {
                 Column(
                     modifier = Modifier
-                        .padding(innerPadding)
+                        .padding(10.dp)
                         .fillMaxHeight()
                         .weight(1f),
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -170,7 +151,6 @@ fun SignInScreen(
                 }
                 Column(
                     modifier = Modifier
-                        .padding(innerPadding)
                         .fillMaxHeight()
                         .weight(1f),
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -178,7 +158,7 @@ fun SignInScreen(
                 ) {
                     GoogleSignInButton(
                         onClick = {
-                            signInViewModel.onEvent(SignInEvent.SignInWithGoogle(context))
+                            onEvent(SignInEvent.SignInWithGoogle(context))
                         },
                         isLoading = signInState.value.isGoogleSignInButtonLoading,
                         isEnable = !signInState.value.isGoogleSignInButtonLoading && !signInState.value.isAnonymousSignInButtonLoading

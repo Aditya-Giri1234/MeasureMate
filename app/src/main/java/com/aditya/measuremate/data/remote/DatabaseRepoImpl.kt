@@ -3,18 +3,22 @@ package com.aditya.measuremate.data.remote
 import com.aditya.measuremate.domain.models.common.User
 import com.aditya.measuremate.domain.models.dashboard.BodyPart
 import com.aditya.measuremate.domain.models.dashboard.BodyPartValue
+import com.aditya.measuremate.domain.models.details.BodyPartValueDto
+import com.aditya.measuremate.domain.models.details.toBodyPartValue
 import com.aditya.measuremate.domain.models.details.toBodyPartValueDto
 import com.aditya.measuremate.domain.repo.DatabaseRepo
 import com.example.udemycourseshoppingapp.common.utils.helper.Constants
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.snapshots
 import com.google.firebase.firestore.toObject
 import com.google.firebase.firestore.toObjects
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
@@ -61,6 +65,48 @@ class DatabaseRepoImpl @Inject constructor(
                 bodyPartCollection().orderBy(Constants.BODY_PART_NAME_FIELD).snapshots()
                     .collect { snapshot ->
                         emit(snapshot.toObjects<BodyPart>())
+                    }
+            } catch (e: Exception) {
+                throw e
+            }
+        }
+    }
+
+    override fun getAllBodyPartsWithLatestValue(): Flow<Pair<Boolean , List<BodyPart>?>> {
+        return flow {
+            try {
+                emit(true to null)
+                bodyPartCollection().orderBy(Constants.BODY_PART_NAME_FIELD).snapshots()
+                    .collect { snapshot ->
+                        val tempBodyPart = snapshot.toObjects<BodyPart>()
+                        val bodyParts = tempBodyPart.mapNotNull { bodyPart ->
+                            val bodyPartId = bodyPart.bodyPartId
+                            bodyPartId?.let{
+                                val latestBodyPartValue = getLatestBodyPartValue(bodyPartId)
+                                bodyPart.copy(latestValue = latestBodyPartValue?.value)
+                            }
+                        }
+                        emit(false to bodyParts)
+                    }
+            } catch (e: Exception) {
+                throw e
+            }
+        }
+    }
+
+    private suspend fun getLatestBodyPartValue(bodyPartId : String) : BodyPartValueDto? {
+        val querySnapshot = bodyPartValueCollection(bodyPartId).orderBy(Constants.BODY_PART_VALUE_DATE_FIELD , Query.Direction.DESCENDING).limit(1).snapshots().firstOrNull()
+
+        return querySnapshot?.documents?.firstOrNull()?.toObject<BodyPartValueDto>()
+    }
+
+    override fun getAllBodyPartValues(bodyPartId : String): Flow<List<BodyPartValue>> {
+        return flow {
+            try {
+                bodyPartValueCollection(bodyPartId).orderBy(Constants.BODY_PART_VALUE_DATE_FIELD , Query.Direction.DESCENDING).snapshots()
+                    .collect { snapshot ->
+                        val bodyPartValueDto =  snapshot.toObjects<BodyPartValueDto>()
+                        emit(bodyPartValueDto.map { it.toBodyPartValue() })
                     }
             } catch (e: Exception) {
                 throw e
@@ -146,6 +192,18 @@ class DatabaseRepoImpl @Inject constructor(
             Result.success(true)
         } catch (e: Exception) {
             Result.failure(e)
+        }
+    }
+
+    override suspend fun deleteBodyPartValue(bodyPartValue: BodyPartValue): Result<Boolean> {
+        return try{
+           val bodyPartId = bodyPartValue.bodyPartId.orEmpty()
+            val bodyPartValueId = bodyPartValue.bodyPartValueId.orEmpty()
+            bodyPartValueCollection(bodyPartId).document(bodyPartValueId
+            ).delete().await()
+            Result.success(true)
+        }catch(e : Exception){
+        Result.failure(e)
         }
     }
 }

@@ -5,6 +5,6 @@ import java.time.LocalDate
 data class BodyPartValue(
     val bodyPartValueId : String?=null ,
     val bodyPartId : String?=null,
-    val value : Float,
-    val date : LocalDate
+    val value : Float = 0f,
+    val date : LocalDate = LocalDate.now()
 )

@@ -28,14 +28,16 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -47,21 +49,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.aditya.measuremate.common.utils.UiEvent
 import com.aditya.measuremate.common.utils.custom_class.MyCalenderSelectableDate
-import com.aditya.measuremate.domain.models.dashboard.BodyPart
 import com.aditya.measuremate.domain.models.dashboard.BodyPartValue
 import com.aditya.measuremate.ui.compoenents.MeasureMateDatePicker
 import com.aditya.measuremate.ui.compoenents.MeasureMetaDialog
 import com.aditya.measuremate.ui.compoenents.NewValueInputBar
 import com.aditya.measuremate.ui.event.details.DetailsEvent
-import com.aditya.measuremate.ui.viewmodels.DetailsViewModel
+import com.aditya.measuremate.ui.event_state.details.DetailsState
 import com.aditya.measuremate.ui.widgets.detail.ChartTimeRangeButtons
 import com.aditya.measuremate.ui.widgets.detail.DetailsBottomSheet
 import com.aditya.measuremate.ui.widgets.detail.LineGraph
@@ -70,20 +68,24 @@ import com.example.common.extension.changeToDate
 import com.example.common.extension.roundToDecimal
 import com.example.udemycourseshoppingapp.common.utils.helper.AppScreenName
 import com.example.udemycourseshoppingapp.common.utils.helper.MeasuringUnit
-import com.example.udemycourseshoppingapp.common.utils.helper.TimeRange
 import com.example.udemycourseshoppingapp.ui.components.AddHorizontalSpace
 import com.example.udemycourseshoppingapp.ui.components.AddVerticalSpace
 import com.example.udemycourseshoppingapp.ui.components.MyTopBar
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import java.time.LocalDate
 
-@Preview(showBackground = true)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DetailsScreen(
-    navController: NavController = rememberNavController(), windowWidthSize : WindowWidthSizeClass = WindowWidthSizeClass.Compact, innerPadding : PaddingValues = PaddingValues(8.dp), detailViewModel : DetailsViewModel = hiltViewModel() , snackBarState: SnackbarHostState = remember { SnackbarHostState() }, bodyPartId : String = "541"
+    navController: NavController = rememberNavController(),
+    windowWidthSize: WindowWidthSizeClass = WindowWidthSizeClass.Compact,
+    snackBarState: SnackbarHostState = remember { SnackbarHostState() },
+    bodyPartId: String = "541",
+    detailsState: State<DetailsState>,
+    uiEvent: Flow<UiEvent>,
+    onEvent: (DetailsEvent) -> Unit,
 ) {
 
 
@@ -96,26 +98,32 @@ fun DetailsScreen(
     var isDetailBottomSheet by rememberSaveable {
         mutableStateOf(false)
     }
-    var selectedCharTimeRangeButton by rememberSaveable {
-        mutableStateOf(TimeRange.LAST7DAYS)
-    }
+
     var isDatePickerDialogOpen by rememberSaveable {
         mutableStateOf(false)
     }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val dateState =  rememberDatePickerState(
-        initialSelectedDateMillis = System.currentTimeMillis() ,
+    val dateState = rememberDatePickerState(
+        initialSelectedDateMillis = System.currentTimeMillis(),
         selectableDates = MyCalenderSelectableDate
     )
-    val detailsState = detailViewModel.uiScreenState.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
     val focusController = LocalFocusManager.current
 
     LaunchedEffect(Unit) {
-        detailViewModel.uiEvent.onEach {
+        uiEvent.onEach {
             when (it) {
                 is UiEvent.SnackBar -> {
-                    snackBarState.showSnackbar(it.msg)
+                    val action = snackBarState.showSnackbar(
+                        it.msg,
+                        actionLabel = it.actionLabel,
+                        duration = SnackbarDuration.Short
+                    )
+
+                    if (action == SnackbarResult.ActionPerformed) {
+                        onEvent(DetailsEvent.RestoreBodyPartValue)
+                    }
+
                 }
 
                 UiEvent.HideBottomSheet -> {
@@ -127,6 +135,7 @@ fun DetailsScreen(
                         }
                     }
                 }
+
                 UiEvent.Navigate -> {
                     navController.navigateUp()
                 }
@@ -148,7 +157,7 @@ fun DetailsScreen(
                     isDetailBottomSheet = false
                 }
             }
-            detailViewModel.onEvent(DetailsEvent.ChangeMeasuringUnit(it))
+            onEvent(DetailsEvent.ChangeMeasuringUnit(it))
         }
     )
 
@@ -164,105 +173,30 @@ fun DetailsScreen(
         },
         onConfirmButtonClick = {
             isDeleteItemDialogOpen = false
-            detailViewModel.onEvent(DetailsEvent.DeleteBodyPart)
+            onEvent(DetailsEvent.DeleteBodyPart)
         }
     )
 
     MeasureMateDatePicker(
-        datePickerState = dateState ,
-        isOpen = isDatePickerDialogOpen ,
-        onDismissRequest = {isDatePickerDialogOpen = false} ,
+        datePickerState = dateState,
+        isOpen = isDatePickerDialogOpen,
+        onDismissRequest = { isDatePickerDialogOpen = false },
         onConfirmButton = {
-                    isDatePickerDialogOpen = false
-            detailViewModel.onEvent(DetailsEvent.OnDateChange(dateState.selectedDateMillis))
+            isDatePickerDialogOpen = false
+            onEvent(DetailsEvent.OnDateChange(dateState.selectedDateMillis))
         }
     )
 
-        when(windowWidthSize){
-            WindowWidthSizeClass.Compact ->{
-                Box(
-                    Modifier
-                        .padding(innerPadding)
+    when (windowWidthSize) {
+        WindowWidthSizeClass.Compact -> {
+            Box(
+                Modifier
+                    .fillMaxSize()
+            ) {
+                Column(
+                    modifier = Modifier
                         .fillMaxSize()
                 ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                    ) {
-                        MyTopBar(
-                            screenName = AppScreenName.DetailsScreen,
-                            title = detailsState.value.bodyPart?.name ?: "",
-                            navController = navController,
-                            action = {
-                                IconButton(onClick = {
-                                    isDeleteItemDialogOpen = true
-                                }) {
-                                    Icon(Icons.Rounded.Delete, contentDescription = "")
-                                }
-                                AddHorizontalSpace(4)
-                                Text(detailsState.value.bodyPart?.measuringUnit ?: MeasuringUnit.CM.code)
-                                AddHorizontalSpace(5)
-                                IconButton(onClick = {
-                                    isDetailBottomSheet = true
-                                }) {
-                                    Icon(Icons.Rounded.ArrowDownward, contentDescription = "")
-                                }
-                            }
-                        )
-                        ChartTimeRangeButtons(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            selectedRangeButton = selectedCharTimeRangeButton,
-                            onClick = {
-                                selectedCharTimeRangeButton = it
-                            })
-
-                        AddVerticalSpace(20)
-
-                        LineGraph(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .aspectRatio(ratio = 2 / 1f)
-                                .background(Color.White)
-                                .padding(16.dp), bodyPartValues = dummyBodyPartValues
-                        )
-                        HistorySection(
-                            modifier = Modifier,
-                            detailsState.value.allBodyPartValue,
-                            "cm",
-                            onDeleteIconClick = {}
-                        )
-                    }
-
-                    NewValueInputBar(
-                        modifier = Modifier.align(Alignment.BottomCenter),
-                        isInputCardVisible = isInputCardVisible,
-                        date = detailsState.value.date.changeLocalDateToDateString(),
-                        value = detailsState.value.textFieldValue,
-                        onValueChange = {detailViewModel.onEvent(DetailsEvent.OnTextFieldValueChange(it))},
-                        onDone = {
-                            focusController.clearFocus()
-                            detailViewModel.onEvent(DetailsEvent.AddNewValue)
-                        },
-                        onImeAction = KeyboardActions {
-                            focusController.clearFocus()
-                        } ,
-                        onCalenderClick = {
-                            isDatePickerDialogOpen = true
-                        }
-                    )
-
-                    InputCardHideIcon(
-                        Modifier.align(Alignment.BottomEnd),
-                        isInputValueCardVisible = isInputCardVisible,
-                        onIconClick = {
-                            isInputCardVisible = !isInputCardVisible
-                        })
-                }
-            }
-            else ->{
-                Column(modifier = Modifier.padding(innerPadding).fillMaxSize()) {
                     MyTopBar(
                         screenName = AppScreenName.DetailsScreen,
                         title = detailsState.value.bodyPart?.name ?: "",
@@ -274,7 +208,9 @@ fun DetailsScreen(
                                 Icon(Icons.Rounded.Delete, contentDescription = "")
                             }
                             AddHorizontalSpace(4)
-                            Text(detailsState.value.bodyPart?.measuringUnit ?: MeasuringUnit.CM.code)
+                            Text(
+                                detailsState.value.bodyPart?.measuringUnit ?: MeasuringUnit.CM.code
+                            )
                             AddHorizontalSpace(5)
                             IconButton(onClick = {
                                 isDetailBottomSheet = true
@@ -283,65 +219,157 @@ fun DetailsScreen(
                             }
                         }
                     )
-                    Row(modifier = Modifier.fillMaxSize()) {
-                        Column(modifier = Modifier.fillMaxHeight().weight(1f) , horizontalAlignment = Alignment.CenterHorizontally , verticalArrangement = Arrangement.Center) {
+                    ChartTimeRangeButtons(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        selectedRangeButton = detailsState.value.timeRange,
+                        onClick = {
+                            onEvent(DetailsEvent.OnTimeRangeChange(it))
+                        })
 
-                            ChartTimeRangeButtons(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp),
-                                selectedRangeButton = selectedCharTimeRangeButton,
-                                onClick = {
-                                    selectedCharTimeRangeButton = it
-                                })
+                    AddVerticalSpace(20)
 
-                            AddVerticalSpace(20)
-
-                            LineGraph(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .aspectRatio(ratio = 2 / 1f)
-                                    .background(Color.White)
-                                    .padding(16.dp), bodyPartValues = dummyBodyPartValues
-                            )
+                    LineGraph(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .aspectRatio(ratio = 2 / 1f)
+                            .background(MaterialTheme.colorScheme.background)
+                            .padding(16.dp), bodyPartValues = detailsState.value.chartBodyPartValue
+                    )
+                    HistorySection(
+                        modifier = Modifier,
+                        detailsState.value.allBodyPartValue,
+                        detailsState.value.bodyPart?.measuringUnit,
+                        onDeleteIconClick = {
+                            onEvent(DetailsEvent.DeleteBodyPartValue(it))
                         }
-                        Box(
-                            modifier = Modifier.fillMaxHeight().weight(1f)
-                        ){
-                            HistorySection(
-                                modifier = Modifier,
-                                dummyBodyPartValues,
-                                "cm",
-                                onDeleteIconClick = {}
-                            )
-
-                            NewValueInputBar(
-                                modifier = Modifier.align(Alignment.BottomCenter),
-                                isInputCardVisible = isInputCardVisible,
-                                date = dateState.selectedDateMillis.changeToDate().changeLocalDateToDateString(),
-                                value = detailsState.value.textFieldValue,
-                                onValueChange = {detailViewModel.onEvent(DetailsEvent.OnTextFieldValueChange(it))},
-                                onDone = {},
-                                onImeAction = KeyboardActions {
-                                    focusController.clearFocus()
-                                } ,
-                                onCalenderClick = {
-                                    isDatePickerDialogOpen = true
-                                }
-                            )
-
-                            InputCardHideIcon(
-                                Modifier.align(Alignment.BottomEnd),
-                                isInputValueCardVisible = isInputCardVisible,
-                                onIconClick = {
-                                    isInputCardVisible = !isInputCardVisible
-                                })
-                        }
-                    }
+                    )
                 }
 
+                NewValueInputBar(
+                    modifier = Modifier.align(Alignment.BottomCenter),
+                    isInputCardVisible = isInputCardVisible,
+                    date = detailsState.value.date.changeLocalDateToDateString(),
+                    value = detailsState.value.textFieldValue,
+                    onValueChange = { onEvent(DetailsEvent.OnTextFieldValueChange(it)) },
+                    onDone = {
+                        focusController.clearFocus()
+                        onEvent(DetailsEvent.AddNewValue)
+                    },
+                    onImeAction = KeyboardActions {
+                        focusController.clearFocus()
+                    },
+                    onCalenderClick = {
+                        isDatePickerDialogOpen = true
+                    }
+                )
+
+                InputCardHideIcon(
+                    Modifier.align(Alignment.BottomEnd),
+                    isInputValueCardVisible = isInputCardVisible,
+                    onIconClick = {
+                        isInputCardVisible = !isInputCardVisible
+                    })
             }
         }
+
+        else -> {
+            Column(modifier = Modifier.fillMaxSize()) {
+                MyTopBar(
+                    screenName = AppScreenName.DetailsScreen,
+                    title = detailsState.value.bodyPart?.name ?: "",
+                    navController = navController,
+                    action = {
+                        IconButton(onClick = {
+                            isDeleteItemDialogOpen = true
+                        }) {
+                            Icon(Icons.Rounded.Delete, contentDescription = "")
+                        }
+                        AddHorizontalSpace(4)
+                        Text(detailsState.value.bodyPart?.measuringUnit ?: MeasuringUnit.CM.code)
+                        AddHorizontalSpace(5)
+                        IconButton(onClick = {
+                            isDetailBottomSheet = true
+                        }) {
+                            Icon(Icons.Rounded.ArrowDownward, contentDescription = "")
+                        }
+                    }
+                )
+                Row(modifier = Modifier.fillMaxSize()) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .weight(1f),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+
+                        ChartTimeRangeButtons(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            selectedRangeButton = detailsState.value.timeRange,
+                            onClick = {
+                                onEvent(DetailsEvent.OnTimeRangeChange(it))
+                            })
+
+                        AddVerticalSpace(20)
+
+                        LineGraph(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .aspectRatio(ratio = 2 / 1f)
+                                .background(MaterialTheme.colorScheme.background)
+                                .padding(16.dp),
+                            bodyPartValues = detailsState.value.chartBodyPartValue
+                        )
+                    }
+                    Box(
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .weight(1f)
+                    ) {
+                        HistorySection(
+                            modifier = Modifier,
+                            detailsState.value.allBodyPartValue,
+                            detailsState.value.bodyPart?.measuringUnit,
+                            onDeleteIconClick = {
+                                onEvent(DetailsEvent.DeleteBodyPartValue(it))
+                            }
+                        )
+
+                        NewValueInputBar(
+                            modifier = Modifier.align(Alignment.BottomCenter),
+                            isInputCardVisible = isInputCardVisible,
+                            date = dateState.selectedDateMillis.changeToDate()
+                                .changeLocalDateToDateString(),
+                            value = detailsState.value.textFieldValue,
+                            onValueChange = { onEvent(DetailsEvent.OnTextFieldValueChange(it)) },
+                            onDone = {
+                                focusController.clearFocus()
+                                onEvent(DetailsEvent.AddNewValue)
+                            },
+                            onImeAction = KeyboardActions {
+                                focusController.clearFocus()
+                            },
+                            onCalenderClick = {
+                                isDatePickerDialogOpen = true
+                            }
+                        )
+
+                        InputCardHideIcon(
+                            Modifier.align(Alignment.BottomEnd),
+                            isInputValueCardVisible = isInputCardVisible,
+                            onIconClick = {
+                                isInputCardVisible = !isInputCardVisible
+                            })
+                    }
+                }
+            }
+
+        }
+    }
 
 
 }
@@ -432,16 +460,3 @@ private fun HistoryCard(
 
 }
 
-val dummyBodyPartValues = listOf(
-    BodyPartValue(value = 72.0f, date = LocalDate.of(2023, 5, 10)),
-    BodyPartValue(value = 76.84865145f, date = LocalDate.of(2023, 5, 1)),
-    BodyPartValue(value = 74.0f, date = LocalDate.of(2023, 4, 20)),
-    BodyPartValue(value = 75.1f, date = LocalDate.of(2023, 4, 5)),
-    BodyPartValue(value = 66.3f, date = LocalDate.of(2023, 3, 15)),
-    BodyPartValue(value = 67.2f, date = LocalDate.of(2023, 3, 10)),
-    BodyPartValue(value = 73.5f, date = LocalDate.of(2023, 3, 1)),
-    BodyPartValue(value = 69.8f, date = LocalDate.of(2023, 2, 18)),
-    BodyPartValue(value = 68.4f, date = LocalDate.of(2023, 2, 1)),
-    BodyPartValue(value = 72.0f, date = LocalDate.of(2023, 1, 22)),
-    BodyPartValue(value = 70.5f, date = LocalDate.of(2023, 1, 14))
-)

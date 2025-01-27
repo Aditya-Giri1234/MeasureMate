@@ -11,11 +11,12 @@ object Constants {
     const val BODY_PART_COLLECTION = "bodyParts"
     const val BODY_PART_VALUE_COLLECTION = "bodyPartValues"
     const val BODY_PART_NAME_FIELD = "name"
+    const val BODY_PART_VALUE_DATE_FIELD = "date"
 
 }
 
 enum class AppScreenName(name : String) {
-    HomeScreen("Home"),
+    SignInScreen("SignIn"),
     DashboardScreen("Dashboard") ,
     AddItemScreen("Add Item") ,
     DetailsScreen("Details")

@@ -7,5 +7,7 @@ data class DashboardState(
     val user: User? = null,
     val bodyPart : List<BodyPart> = emptyList(),
     val isSignOutButtonLoading : Boolean = false,
-    val isSignInButtonLoading : Boolean = false
+    val isSignInButtonLoading : Boolean = false ,
+    val dataIsLoading : Boolean = false
+
 )

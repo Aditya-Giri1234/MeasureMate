@@ -8,9 +8,12 @@ import kotlinx.coroutines.flow.Flow
 interface DatabaseRepo {
     fun getSignedUser() : Flow<User?>
     fun getAllBodyParts() : Flow<List<BodyPart>>
+    fun getAllBodyPartsWithLatestValue() : Flow<Pair<Boolean , List<BodyPart>?>>
+    fun getAllBodyPartValues(bodyPartId : String) : Flow<List<BodyPartValue>>
     fun getBodyPart(bodyPartId : String) : Flow<BodyPart?>
     suspend fun addUser() : Flow<Result<Boolean>>
     suspend fun upsertBodyPart(bodyPart : BodyPart) : Result<Boolean>
     suspend fun deleteBodyPart(bodyPartId : String) : Result<Boolean>
     suspend fun upsertBodyPartValue(bodyPartValue: BodyPartValue) : Result<Boolean>
+    suspend fun deleteBodyPartValue(bodyPartValue: BodyPartValue) : Result<Boolean>
 }

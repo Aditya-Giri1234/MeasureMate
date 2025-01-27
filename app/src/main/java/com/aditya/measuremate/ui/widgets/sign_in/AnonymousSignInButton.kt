@@ -46,7 +46,7 @@ fun AnonymousSignInButton(
             disabledContentColor = MaterialTheme.colorScheme.onSecondary
         )
     ) {
-        Text(buttonText)
+        Text(buttonText , color = if (isEnable) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant)
         AddHorizontalSpace(5)
         if(isLoading){
             CircularProgressIndicator(strokeWidth = 1.dp, color = Color.White , modifier = Modifier.size(20.dp))
