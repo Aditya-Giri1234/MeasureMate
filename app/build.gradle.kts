@@ -96,8 +96,8 @@ dependencies {
 
     //Jetpack Compose recompose debugger by log
     // Solution of this dependency available to all module :- https://stackoverflow.com/a/48443958/17464278
-    implementation("io.github.theapache64:rebugger:1.0.0-rc03")
-    implementation("androidx.compose.material:material-icons-extended:1.7.1")
+    implementation(libs.rebugger)
+    implementation(libs.androidx.material.icons.extended)
 
     //Google gson
     implementation(libs.gson)
@@ -108,15 +108,8 @@ dependencies {
     //Coil
     implementation(libs.coil.compose)
 
-    //For Compose Runtime Lifecycle support (collectAsStateWithLifecyle())
+    //For Compose Runtime Lifecycle support (collectAsStateWithLifeCycle())
     implementation(libs.androidx.lifecycle.runtime.compose)
-
-    //retrofit
-    implementation(libs.retrofit)
-    implementation(libs.retrofit.gson)
-    implementation(libs.okhttp)
-    implementation(libs.okhttp.logging)
-
 
     //Kotlin - Serialization
     implementation(libs.kotlin.serialization)

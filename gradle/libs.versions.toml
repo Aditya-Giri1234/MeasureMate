@@ -14,7 +14,9 @@ composeBom = "2025.01.00"
 coilCompose = "2.7.0"
 gson = "2.11.0"
 material3WindowSizeClass = "1.3.1"
+materialIconsExtended = "1.7.6"
 navigationCompose = "2.8.5"
+rebugger = "1.0.0-rc03"
 symbolProcessing = "2.0.0-1.0.21"
 room_version = "2.6.1"
 hilt = "2.51.1"
@@ -34,6 +36,7 @@ androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = 
 androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "coreSplashscreen" }
 androidx-credentials = { module = "androidx.credentials:credentials", version.ref = "googleid" }
 androidx-credentials-play-services-auth = { module = "androidx.credentials:credentials-play-services-auth", version.ref = "googleid" }
+androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsExtended" }
 androidx-material3-windowSizeClass = { module = "androidx.compose.material3:material3-window-size-class", version.ref = "material3WindowSizeClass" }
 androidx-ui-text-google-fonts = { module = "androidx.compose.ui:ui-text-google-fonts", version.ref = "uiTextGoogleFonts" }
 googleid = { module = "com.google.android.libraries.identity.googleid:googleid", version.ref = "googleid" }
@@ -55,6 +58,7 @@ coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose"
 androidx-lifecycle-runtime-compose = {group = "androidx.lifecycle" , name ="lifecycle-runtime-compose" , version.ref = "lifecycleRuntimeKtx"}
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
+rebugger = { module = "io.github.theapache64:rebugger", version.ref = "rebugger" }
 symbol-processing = { group = "com.google.devtools.ksp" , name = "symbol-processing-api", version.ref = "symbolProcessing"}
 room = {group ="androidx.room" , name = "room-runtime" , version.ref = "room_version" }
 room-ktx ={module="androidx.room:room-ktx" ,version.ref = "room_version"}
