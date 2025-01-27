@@ -3,7 +3,7 @@ package com.example.udemycourseshoppingapp.common.utils.helper
 object Constants {
 
     const val ADD_EVENT_DATE_FORMAT = "EEE MMM dd yyyy"
-    const val GOOGLE_CLIENT_ID = "53022528071-glb0at8budlspbk3p57958lsqjquad8h.apps.googleusercontent.com"
+    const val GOOGLE_CLIENT_ID = ""
 
 
     //Firestore Collection
